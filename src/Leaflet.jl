@@ -9,6 +9,7 @@ end Leaflet
     
 import Colors, GeoInterface, GeoJSON, JSON3, UUIDs
 using Dates, WebIO
+using JSServe, Observables
 
 import TileProviders as Providers
 
