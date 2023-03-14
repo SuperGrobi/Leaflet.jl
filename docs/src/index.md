@@ -37,7 +37,7 @@ visParams = Dict(
 map_id_dict = ee.Image(image).getMapId(visParams)
 map_url = map_id_dict["tile_fetcher"].url_format
 
-# Define a leaflet provider
+# Define a TileProviders provider
 ee_provider = Providers.Provider(
     map_url,
     Dict{Symbol,Any}(
