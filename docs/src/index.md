@@ -4,7 +4,7 @@ CurrentModule = Leaflet
 
 # Leaflet
 
-Documentation for [Leaflet](https://github.com/JuliaGeo/Leaflet.jl).
+Documentation for [Leaflet](https://github.com/SuperGrobi/Leaflet.jl).
 
 ```@index
 ```
@@ -37,8 +37,8 @@ visParams = Dict(
 map_id_dict = ee.Image(image).getMapId(visParams)
 map_url = map_id_dict["tile_fetcher"].url_format
 
-# Define a leaflet provider
-ee_provider = Leaflet.Provider(
+# Define a TileProviders provider
+ee_provider = Providers.Provider(
     map_url,
     Dict{Symbol,Any}(
         :maxZoom => 20,
