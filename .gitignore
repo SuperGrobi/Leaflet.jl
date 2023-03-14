@@ -3,4 +3,5 @@
 *.jl.mem
 .vscode/settings.json
 
-Manifest.toml
+/Manifest.toml
+/docs/build/
