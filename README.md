@@ -1,7 +1,7 @@
 # Leaflet
 
-[![](https://img.shields.io/badge/docs-stable-blue.svg)]()
-[![](https://img.shields.io/badge/docs-dev-blue.svg)]()
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://supergrobi.github.io/Leaflet.jl/stable)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://supergrobi.github.io/Leaflet.jl/dev)
 [![CI](https://github.com/SuperGrobi/Leaflet.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/SuperGrobi/Leaflet.jl/actions/workflows/CI.yml)
 
 LeafletJS maps for Julia.
