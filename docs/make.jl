@@ -17,5 +17,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/SuperGrobi/Leaflet.jl",
-    devbranch="move_to_jsserve"
+    devbranch="main"
 )
