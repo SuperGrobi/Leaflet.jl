@@ -4,7 +4,7 @@ CurrentModule = Leaflet
 
 # Leaflet
 
-Documentation for [Leaflet](https://github.com/JuliaGeo/Leaflet.jl).
+Documentation for [Leaflet](https://github.com/SuperGrobi/Leaflet.jl).
 
 ```@index
 ```
