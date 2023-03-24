@@ -34,9 +34,19 @@ function Layer(
     marker_size = 3.0,
     border_width = 2.0,
 )
+color_to_use="#"
+if isa(color,Symbol)
+    color_to_use*=Colors.hex(Colors.parse(Colors.Colorant,color))
+elseif isa(color,Colors.RGB)
+    color_to_use*=Colors.hex(color)
+elseif isa(color,Colors.RGBA)
+    color_to_use*=Colors.hex(color)[3:end]
+else
+    color_to_use=color
+end
     options = Dict(
         :color_map => string(color_map), 
-        :color => string(color), 
+        :color => color_to_use, 
         :opacity => opacity,
         :fill_opacity => fill_opacity,
         :marker_size => marker_size, 
