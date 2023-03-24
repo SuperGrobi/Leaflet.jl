@@ -24,25 +24,22 @@ or by calling `WebIO.render(yourmap)`.
 - `height::Int = 500`: map height in pixels.
 - `zoom::Int = 11`: default zoom level.
 """
-struct Map{L<:Vector{<:Layer},C,S}
-    layers::L
+mutable struct Map{C,S}
     config::C
     scope::S
+    callback::String
 end
 function Map(;
-    layers=Layer[],
     center::Vector{Float64}=Float64[0.0, 0.0],
     width::Int=900,
     height::Int=500,
     zoom::Int=11,
     provider=Providers.OSM(),
 )
-    if layers isa Layer
-        layers = [layers]
-    end
     id = string(UUIDs.uuid4())
     conf = Config(width, height, center, zoom, provider, id)
-    return Map(layers, conf, leaflet_scope(layers, conf))
+    scope,callback=leaflet_scope(conf)
+    return Map(conf, scope,callback)
 end
 
 # WebIO rendering interface
@@ -50,14 +47,16 @@ end
     return WebIO.render(map.scope)
 end
 
+
+
 # return the html head/body and javascriopt for a leaflet map
-function leaflet_scope(layers, cfg::Config)
+function leaflet_scope(cfg::Config)
     # Define online assets
     urls = [
-        "https://unpkg.com/leaflet@1.7.1/dist/leaflet.js",
-        "https://unpkg.com/leaflet@1.7.1/dist/leaflet.css", 
-        "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js",
-        "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/1.3.3/chroma.min.js",
+        "https://unpkg.com/leaflet@1.9.3/dist/leaflet.js",
+        "https://unpkg.com/leaflet@1.9.3/dist/leaflet.css", 
+        "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.13.6/underscore.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js",
     ]
 
     assets = Asset.(urls)
@@ -83,10 +82,16 @@ function leaflet_scope(layers, cfg::Config)
 
     # The javascript scope
     scope = Scope(; dom=wrapperdiv, imports=assets)
-    # leaflet javascript we run as a callback on load
-    mapjs = leaflet_javascript(layers, cfg)
-    onimport(scope, mapjs)
-    return scope
+    prov = cfg.provider
+    url = JSON3.write(prov.url)
+    options = JSON3.write(prov.options)
+
+    callback="""
+    var map = L.map('map$(cfg.id)').setView($(cfg.center), $(cfg.zoom));
+    L.tileLayer($url,$options).addTo(map);
+    """
+   
+    return scope,callback
 end
 
 # leaflet_javascript
@@ -94,7 +99,7 @@ end
 #
 # Returns a WebIO.JSString that holds a 
 # javascript callback function for use in `WebIO.onimport`
-function leaflet_javascript(layers, cfg::Config)
+function leaflet_javascript_layer(layers)
     io = IOBuffer()
     for (i, layer) in enumerate(layers)
         data = layer.data
@@ -191,19 +196,7 @@ function leaflet_javascript(layers, cfg::Config)
         ""
     end
 
-    prov = cfg.provider
-    url = JSON3.write(prov.url)
-    options = JSON3.write(prov.options)
-
-    callback = """
-    function(p) {
-        var map = L.map('map$(cfg.id)').setView($(cfg.center), $(cfg.zoom));
-        L.tileLayer($url,$options).addTo(map);
-        $layerjs
-    }
-    """
-
-    return WebIO.JSString(callback)
+    return layerjs
 end
 
 option2style(attribute::Real) = string(attribute)
@@ -233,4 +226,24 @@ function layeroptions2style(options::Dict{Symbol,Any}, i::Int, colortype::Symbol
     end
     write(io, "}")
     return String(take!(io))
+end
+
+function add_marker(m::Map, position)
+    callback="""
+    L.marker($position).addTo(map);\n
+    """
+    m.callback*=callback
+end
+
+function add_layer(m::Map,l::Vector{<:Layer})
+    if l isa Layer
+        l=[l]
+    end
+    mapjs=leaflet_javascript_layer(l)
+    m.callback*=mapjs
+end
+
+function run(m::Map)
+    callback="""function(p){$(m.callback)}"""
+    onimport(m.scope,WebIO.JSString(callback))
 end
